@@ -13,7 +13,7 @@ class JudgeHandler
   extend Jimson::Handler
   C = 0
   CPP = 1
-  def addJudge(type, pathStr)
+  def addJudge(question, type, pathStr)
     path = Pathname.new(pathStr)
     cmd = ""
     res = "AC"
