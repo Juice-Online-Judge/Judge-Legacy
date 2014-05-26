@@ -7,6 +7,8 @@ require 'bundler/setup'
 require 'jimson'
 require 'pathname'
 
+require_relative 'pluginConfig'
+
 class JudgeHandler
   extend Jimson::Handler
   C = 0
@@ -23,7 +25,8 @@ class JudgeHandler
       name = path.basename(".cpp")
       cmd = "g++ -O2 -o #{name} #{path.basename} -lm"
     else
-      return "Error:Unknow file type"
+      cmd = ExtraCmdGet::cmdGet(path.extname, pathStr)
+      return "Error:Unknown file type" unless cmd
     end
     res = "CE" unless system cmd
     return res
