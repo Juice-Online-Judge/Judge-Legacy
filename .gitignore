@@ -102,3 +102,14 @@ build/
 # KDE directory preferences
 .directory
 
+# Created by http://www.gitignore.io
+
+### CMake ###
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+run
+bin
