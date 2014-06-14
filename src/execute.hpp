@@ -3,7 +3,7 @@
 
 #include <string>
 
-int execute(std::string, std::string, int, int);
+int execute(const std::string&, const std::string&, int, int);
 
 #endif /* end of include guard: EXECUTE_HPP_INCLUDE */
 

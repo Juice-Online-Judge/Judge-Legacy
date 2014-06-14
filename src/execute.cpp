@@ -11,6 +11,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/types.h>
+#include <sys/user.h>
 
 #include <boost/filesystem.hpp>
 
@@ -25,8 +26,10 @@ volatile int childStart = 0;
 static void startTrace(int);
 static void setupRLimit(int, rlim_t);
 
-int execute(string quesName, string pathStr, int timeLimit, int memoryLimit) {
+int execute(const string& quesName, const string& pathStr, int timeLimit, int memoryLimit) {
   int res = PASS;
+  FILE *fp;
+  user_regs_struct uregs;
   if(signal(SIGUSR1, startTrace) == SIG_ERR) {
     cerr << "Error: Unable to create signal handler for SIGUSR1" << endl;
   }
@@ -36,13 +39,15 @@ int execute(string quesName, string pathStr, int timeLimit, int memoryLimit) {
     string inFileName((pwd.parent_path() / "run" / "input" / (quesName + ".in")).string());
     string outFileName((pwd.parent_path() / "run" / "ans" / (exePath.filename().string() + ".ans")).string());
     freopen(inFileName.c_str(), "r", stdin);
-    freopen(outFileName.c_str(), "w", stdout);
+    fp = fopen(outFileName.c_str(), "w");
+    dup2(fileno(fp), 1);
     setupRLimit(RLIMIT_NPROC, 1);
-    setupRLimit(RLIMIT_NOFILE, 2);
+    setupRLimit(RLIMIT_NOFILE, 64);
     setupRLimit(RLIMIT_MEMLOCK, 0);
-    setupRLimit(RLIMIT_AS, memoryLimit * 1024);
+    setupRLimit(RLIMIT_AS, (memoryLimit + 15) * 1024 * 1024);
     kill(getppid(), SIGUSR1);
-    execlp(pathStr.c_str(), pathStr.c_str());
+    ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+    execlp(pathStr.c_str(), pathStr.c_str(), NULL);
   }
   if(child < 0) {
     return RE;
@@ -53,26 +58,32 @@ int execute(string quesName, string pathStr, int timeLimit, int memoryLimit) {
     int syscall;
     wait(&status);
     if(WIFEXITED(status)) {
+      cout << "child exit" << endl;
       break;
     }
     if(WIFSIGNALED(status)) {
       res = RE;
+      cout << "child got signal " << WTERMSIG(status) << endl;
       break;
     }
-    if(childStart) {
-      syscall = ptrace(PTRACE_PEEKUSER, child, 8 * ORIG_RAX, NULL);
-      if(syscall == __NR_fork) {
-        ptrace(PTRACE_SYSCALL, child, NULL, NULL);
-      }
-      else {
-        ptrace(PTRACE_SYSCALL, child, NULL, NULL);
-      }
+    ptrace(PTRACE_GETREGS, child, 0, &uregs);
+    syscall = uregs.orig_rax;
+    cout << "child call: " << syscall  << endl;
+    if((syscall == SYS_fork || syscall == SYS_clone || syscall == SYS_write) && childStart) {
+      cout << "child call fork" << endl;
+      ptrace(PTRACE_KILL, child, NULL, NULL);
+    }
+    else {
+      ptrace(PTRACE_CONT, child, NULL, NULL);
+      ptrace(PTRACE_SYSCALL, child, NULL, NULL);
     }
   }
   return res;
 }
 
 static void startTrace(int signo) {
+  cout << "start judge" << endl;
+  ptrace(PTRACE_SYSCALL, child, NULL, NULL);
   childStart = 1;
 }
 
