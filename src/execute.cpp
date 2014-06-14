@@ -4,6 +4,7 @@
 
 #include <unistd.h>
 #include <signal.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <sys/ptrace.h>
 #include <sys/syscall.h>
@@ -16,6 +17,7 @@
 #include <boost/filesystem.hpp>
 
 #include "judgeStatus.hpp"
+#include "childErrorStatus.hpp"
 #include "execute.hpp"
 
 using namespace std;
@@ -36,11 +38,24 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
   child = fork();
   if(child == 0) {
     boost::filesystem::path pwd(boost::filesystem::current_path()), exePath(pathStr);
-    string inFileName((pwd.parent_path() / "run" / "input" / (quesName + ".in")).string());
+    string inFileName((pwd.parent_path() / "run" / "in" / (quesName + ".in")).string());
     string outFileName((pwd.parent_path() / "run" / "ans" / (exePath.filename().string() + ".ans")).string());
-    freopen(inFileName.c_str(), "r", stdin);
+    if(boost::filesystem::exists(boost::filesystem::path(inFileName)))
+      exit(InFileNotFound);
     fp = fopen(outFileName.c_str(), "w");
     dup2(fileno(fp), 1);
+		int fd = open(inFileName.c_str(), O_RDONLY, 0644);
+    int outFd = open(outFileName.c_str(), O_WRONLY);
+		if(fd < 0)
+      exit(FileOpenError);
+    if(outFd < 0)
+      exit(FileOpenError);
+		if(dup2(fd, STDIN_FILENO) < 0)
+      exit(Dup2Error);
+		if(dup2(outFd, STDOUT_FILENO) < 0)
+      exit(Dup2Error);
+    close(fd);
+    close(outFd);
     setupRLimit(RLIMIT_NPROC, 1);
     setupRLimit(RLIMIT_NOFILE, 64);
     setupRLimit(RLIMIT_MEMLOCK, 0);
@@ -48,6 +63,7 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
     kill(getppid(), SIGUSR1);
     ptrace(PTRACE_TRACEME, 0, NULL, NULL);
     execlp(pathStr.c_str(), pathStr.c_str(), NULL);
+    exit(ExeclpError);
   }
   if(child < 0) {
     return RE;
@@ -58,7 +74,7 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
     int syscall;
     wait(&status);
     if(WIFEXITED(status)) {
-      cout << "child exit" << endl;
+      cout << "child exit:" << WEXITSTATUS(status) << endl;
       break;
     }
     if(WIFSIGNALED(status)) {
