@@ -4,6 +4,7 @@
 
 #include <unistd.h>
 #include <signal.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <sys/ptrace.h>
 #include <sys/syscall.h>
@@ -36,11 +37,22 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
   child = fork();
   if(child == 0) {
     boost::filesystem::path pwd(boost::filesystem::current_path()), exePath(pathStr);
-    string inFileName((pwd.parent_path() / "run" / "input" / (quesName + ".in")).string());
+    string inFileName((pwd.parent_path() / "run" / "in" / (quesName + ".in")).string());
     string outFileName((pwd.parent_path() / "run" / "ans" / (exePath.filename().string() + ".ans")).string());
-    freopen(inFileName.c_str(), "r", stdin);
     fp = fopen(outFileName.c_str(), "w");
     dup2(fileno(fp), 1);
+		int fd = open(inFileName.c_str(), O_RDONLY, 0644);
+    int outFd = open(outFileName.c_str(), O_WRONLY);
+		if(fd < 0)
+      exit(89);
+    if(outFd < 0)
+      exit(90);
+		if(dup2(fd, STDIN_FILENO) < 0)
+      exit(91);
+		if(dup2(outFd, STDOUT_FILENO) < 0)
+      exit(92);
+    close(fd);
+    close(outFd);
     setupRLimit(RLIMIT_NPROC, 1);
     setupRLimit(RLIMIT_NOFILE, 64);
     setupRLimit(RLIMIT_MEMLOCK, 0);
@@ -58,7 +70,7 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
     int syscall;
     wait(&status);
     if(WIFEXITED(status)) {
-      cout << "child exit" << endl;
+      cout << "child exit:" << WEXITSTATUS(status) << endl;
       break;
     }
     if(WIFSIGNALED(status)) {
@@ -69,7 +81,7 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
     ptrace(PTRACE_GETREGS, child, 0, &uregs);
     syscall = uregs.orig_rax;
     cout << "child call: " << syscall  << endl;
-    if((syscall == SYS_fork || syscall == SYS_clone || syscall == SYS_write) && childStart) {
+    if((syscall == SYS_fork || syscall == SYS_clone) && childStart) {
       cout << "child call fork" << endl;
       ptrace(PTRACE_KILL, child, NULL, NULL);
     }
