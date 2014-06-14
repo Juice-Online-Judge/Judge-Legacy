@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.6)
+PROJECT(executor)
+set(executor_VERSION_MAJOR 0)
+set(executor_VERSION_MINOR 1)
+FIND_PACKAGE(Boost 1.55 COMPONENTS program_options filesystem system REQUIRED)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+ADD_EXECUTABLE(executor main.cpp execute.cpp)
+TARGET_LINK_LIBRARIES(executor ${Boost_LIBRARIES})
