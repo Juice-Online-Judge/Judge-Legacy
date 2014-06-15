@@ -40,7 +40,7 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
     boost::filesystem::path pwd(boost::filesystem::current_path()), exePath(pathStr);
     string inFileName((pwd.parent_path() / "run" / "in" / (quesName + ".in")).string());
     string outFileName((pwd.parent_path() / "run" / "ans" / (exePath.filename().string() + ".ans")).string());
-    if(boost::filesystem::exists(boost::filesystem::path(inFileName)))
+    if(!boost::filesystem::exists(boost::filesystem::path(inFileName)))
       exit(InFileNotFound);
     fp = fopen(outFileName.c_str(), "w");
     dup2(fileno(fp), 1);
@@ -75,6 +75,9 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
     wait(&status);
     if(WIFEXITED(status)) {
       cout << "child exit:" << WEXITSTATUS(status) << endl;
+      if(isErrorStatus(WEXITSTATUS(status))) {
+        cerr << "Error: " << getErrorMessage(WEXITSTATUS(status)) << endl;
+      }
       break;
     }
     if(WIFSIGNALED(status)) {
