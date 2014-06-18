@@ -4,8 +4,9 @@
 require 'rubygems'
 require 'bundler/setup'
 
-require 'jimson'
 require 'pathname'
+
+Bundler.require
 
 require_relative 'pluginConfig'
 
