@@ -40,3 +40,4 @@ PLATFORMS
 DEPENDENCIES
   activerecord (~> 4.1.1)
   jimson (~> 0.10.0)
+  thread_safe
