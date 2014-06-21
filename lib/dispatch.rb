@@ -2,13 +2,12 @@
 #encoding:utf-8
 
 require 'rubygems'
-require 'bundler/setup'
-
 require 'pathname'
 
-Bundler.require
-
+require_relative '../config/environment.rb'
 require_relative 'pluginConfig'
+
+require 'jimson'
 
 class JudgeHandler
   extend Jimson::Handler

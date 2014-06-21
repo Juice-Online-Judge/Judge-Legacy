@@ -2,7 +2,7 @@
 #encoding:utf-8
 
 require 'rubygems'
-require 'bundler/setup'
+require_relative '../config/environment.rb'
 
 class ExtraCmdGet
   @@langSupport = {}

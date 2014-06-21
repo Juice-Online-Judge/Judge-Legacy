@@ -2,6 +2,7 @@
 #encoding:utf-8
 
 require 'rubygems'
-require 'bundler/setup'
+
+require_relative '../config/environment.rb'
 
 require 'active_record'
