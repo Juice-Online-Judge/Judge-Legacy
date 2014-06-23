@@ -1,0 +1,6 @@
+{
+  "inPath": "$AppPath/run/in",
+  "outPath": "$AppPath/run/out",
+  "ansPath": "$AppPath/run/ans",
+  "exePath": "$AppPath/run/exe"
+}
