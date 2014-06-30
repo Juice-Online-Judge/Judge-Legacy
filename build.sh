@@ -5,3 +5,4 @@ cd src/build
 cmake ..
 make
 mv executor ../../bin
+mv libexecute.so ../../ext
