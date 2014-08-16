@@ -22,14 +22,17 @@
 
 using namespace std;
 
-pid_t child;
-volatile int childStart = 0;
+namespace {
+  pid_t child;
 
-static void startTrace(int);
-static void timeLimitExceed(int);
-static void setupRLimit(int, rlim_t);
-static int timeLimit;
-static volatile int res = PASS;
+  volatile int childStart = 0;
+  volatile int timeLimit;
+  volatile int res = PASS;
+
+  void startTrace(int);
+  void timeLimitExceed(int);
+  void setupRLimit(int, rlim_t);
+}
 
 int execute(const string& quesName, const string& pathStr, int timeLimit, int memoryLimit) {
   FILE *fp;
@@ -109,26 +112,28 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
   return res;
 }
 
-static void startTrace(int signo) {
-  cout << "start judge" << endl;
-  alarm(timeLimit);
-  ptrace(PTRACE_SYSCALL, child, NULL, NULL);
-  childStart = 1;
-}
-
-static void timeLimitExceed(int /*signo*/) {
-  static int occurTime = 0;
-  if(occurTime) {
-    kill(child, SIGKILL);  // time limit exceed twice. kill it
+namespace {
+  void startTrace(int /*signo*/) {
+    cout << "start judge" << endl;
+    alarm(timeLimit);
+    ptrace(PTRACE_SYSCALL, child, NULL, NULL);
+    childStart = 1;
   }
-  else {
-    res = TLE;
-    occurTime++;
-    alarm(1); // give more time
-  }
-}
 
-static void setupRLimit(int res, rlim_t limit) {
-  rlimit rl = { .rlim_cur = limit, .rlim_max = limit };
-  setrlimit(res, &rl);
+  void timeLimitExceed(int /*signo*/) {
+    static int occurTime = 0;
+    if(occurTime) {
+      kill(child, SIGKILL);  // time limit exceed twice. kill it
+    }
+    else {
+      res = TLE;
+      occurTime++;
+      alarm(1); // give more time
+    }
+  }
+
+  void setupRLimit(int res, rlim_t limit) {
+    rlimit rl = { .rlim_cur = limit, .rlim_max = limit };
+    setrlimit(res, &rl);
+  }
 }
