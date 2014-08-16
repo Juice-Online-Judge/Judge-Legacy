@@ -26,15 +26,21 @@ pid_t child;
 volatile int childStart = 0;
 
 static void startTrace(int);
+static void timeLimitExceed(int);
 static void setupRLimit(int, rlim_t);
+static int timeLimit;
+static volatile int res = PASS;
 
 int execute(const string& quesName, const string& pathStr, int timeLimit, int memoryLimit) {
-  int res = PASS;
   FILE *fp;
   user_regs_struct uregs;
   if(signal(SIGUSR1, startTrace) == SIG_ERR) {
     cerr << "Error: Unable to create signal handler for SIGUSR1" << endl;
   }
+  if(signal(SIGALRM, timeLimitExceed) == SIG_ERR) {
+    cerr << "Error: Unable to create signal handler for SIGALRM" << endl;
+  }
+  ::timeLimit = timeLimit;
   child = fork();
   if(child == 0) {
     boost::filesystem::path pwd(boost::filesystem::current_path()), exePath(pathStr);
@@ -74,6 +80,7 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
     int syscall;
     wait(&status);
     if(WIFEXITED(status)) {
+      alarm(0); // cancel
       cout << "child exit:" << WEXITSTATUS(status) << endl;
       if(isErrorStatus(WEXITSTATUS(status))) {
         cerr << "Error: " << getErrorMessage(WEXITSTATUS(status)) << endl;
@@ -81,7 +88,9 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
       break;
     }
     if(WIFSIGNALED(status)) {
-      res = RE;
+      alarm(0);  //cancel
+      if(res == PASS)
+        res = RE;
       cout << "child got signal " << WTERMSIG(status) << endl;
       break;
     }
@@ -102,8 +111,21 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
 
 static void startTrace(int signo) {
   cout << "start judge" << endl;
+  alarm(timeLimit);
   ptrace(PTRACE_SYSCALL, child, NULL, NULL);
   childStart = 1;
+}
+
+static void timeLimitExceed(int /*signo*/) {
+  static int occurTime = 0;
+  if(occurTime) {
+    kill(child, SIGKILL);  // time limit exceed twice. kill it
+  }
+  else {
+    res = TLE;
+    occurTime++;
+    alarm(1); // give more time
+  }
 }
 
 static void setupRLimit(int res, rlim_t limit) {
