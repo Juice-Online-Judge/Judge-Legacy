@@ -34,7 +34,7 @@ void loggerInit(char *argv[]) {
   );
   // sink filter
   sink->set_filter(
-    boost::log::trivial::severity > boost::log::trivial::info
+    boost::log::trivial::severity > boost::log::trivial::debug
   );
   // add sink
   boost::shared_ptr< boost::log::core > core = boost::log::core::get();
