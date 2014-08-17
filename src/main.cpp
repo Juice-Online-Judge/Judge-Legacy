@@ -2,6 +2,7 @@
 
 #include <boost/program_options.hpp>
 
+#include "logger.hpp"
 #include "execute.hpp"
 
 using namespace std;
@@ -11,6 +12,7 @@ int main(int argc, char *argv[]) {
   int sec, mem;
   string ques, path;
   po::options_description desc("Options");
+  loggerInit(argv);
   desc.add_options()
     ("help,h", "Show help messages")
     ("time,t", po::value<int>(&sec)->required(), "Time limit(Sec)")
