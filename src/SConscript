@@ -1,0 +1,22 @@
+srcFiles = [
+    "config.cpp",
+    "execute.cpp",
+    "logger.cpp",
+    ]
+
+Import("debug")
+
+env = Environment()
+env.Append(CXXFLAGS = "-Wall -std=gnu++11 -pthread", LIBS = [
+  "boost_program_options",
+  "boost_filesystem",
+  "boost_system",
+  "boost_thread",
+  "boost_log",
+  "pthread"
+  ]
+)
+
+prog = env.Program("executor", srcFiles + ["main.cpp"])
+lib = env.SharedLibrary("executor", srcFiles + ["libmain.cpp"])
+env.NoClean([prog, lib])
