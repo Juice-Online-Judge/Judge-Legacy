@@ -113,3 +113,9 @@ install_manifest.txt
 
 run
 bin
+# Created by https://www.gitignore.io
+
+### SCons ###
+# for projects that use SCons for building: http://http://www.scons.org/
+.sconsign.dblite
+
