@@ -2,3 +2,8 @@
 :development:
   :adapt: :sqllite3
   :database: db/judge.db
+:product:
+  :adapt: mysql
+  :database: Juice
+  :username:
+  :password:
