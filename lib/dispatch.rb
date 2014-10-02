@@ -2,34 +2,49 @@
 #encoding:utf-8
 
 require 'rubygems'
+require 'thread'
+require 'open3'
 require 'pathname'
 
 require_relative '../config/environment.rb'
+require_relative 'model/judge_status.rb'
+require_relative 'Const'
 require_relative 'pluginConfig'
 
 require 'jimson'
 
-class JudgeHandler
-  extend Jimson::Handler
-  C = 0
-  CPP = 1
-  def addJudge(question, type, pathStr)
-    path = Pathname.new(pathStr)
+taskQueue = Queue.new
+
+Thread.new {
+  while (task = taskQueue.pop)
+    codeKey = task[:codeKey]
+    data = User_Code_Lesson.where(code_key: codeKey).first
+    code = data.user_code
     cmd = ""
     res = "AC"
+    type = LangType.C
     case type
-    when C
+    when LangType.C
       name = path.basename(".c")
-      cmd = "gcc -O2 -o #{path.dirname + name} #{pathStr} -lm"
-    when CPP
+      cmd = "gcc -O2 -o #{codeKey} -xc - -lm"
+    when LangType.CPP
       name = path.basename(".cpp")
-      cmd = "g++ -O2 -o #{name} #{path.basename} -lm"
+      cmd = "g++ -O2 -o #{codeKey} -xc - -lm"
     else
       cmd = ExtraCmdGet::cmdGet(path.extname, pathStr)
       return "Error:Unknown file type" unless cmd
     end
-    res = "CE" unless system cmd
-    return res
+    _, s = Open3.capture2(cmd, stdin_data: code)
+    res = "CE" unless s.exitstatus == 0
+    data.result = Result[res]
+    data.save
+  end
+}
+
+class JudgeHandler
+  extend Jimson::Handler
+  def addJudge(codeKey, tableName, problemKey)
+    taskQueue << {codeKey:codeKey, tableName:tableName, problemKey:problemKey}
   end
 end
 
