@@ -10,7 +10,7 @@ require 'active_record'
 
 ActiveRecord::Base.establish_connection(adapter:"sqlite3", database:"#{AppPath}/run/judge.db")
 
-class Lession_Implement < ActiveRecord::Base
+class Lesson_Implement < ActiveRecord::Base
   self.table_name = "lesson_implement"
 end
 
