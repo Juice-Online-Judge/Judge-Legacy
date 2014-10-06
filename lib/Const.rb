@@ -14,3 +14,11 @@ Result = {
   "MLE" => 5,
   "RE" => 6
 }
+
+Mode = {
+  "Diff" => 0,
+  "WS" => 1,
+  "BLine" => 2,
+  "BLineWS" => 3,
+  "Loader" => 4
+}
