@@ -11,6 +11,7 @@ require_relative 'model/judge_status.rb'
 require_relative 'Const'
 require_relative 'Logger'
 require_relative 'Executor'
+require_relative 'judge'
 require_relative 'pluginConfig'
 
 require 'jimson'
@@ -44,6 +45,9 @@ Thread.new {
         $logger.info "Start judge #{codeKey}"
         quesData = Lesson_Implement.where(implement_key: data.ipm_pt_key).first
         Executor.executor(data.ipm_pt_key, File.join(AppPath, "run", "exe", codeKey), quesData.time_limit, quesData.memory_limit)
+        if res == "AC"
+          res = "WA" unless Judger.judge(quesData.ipm_pt_key, File.read(File.join(AppPath, "run", "ans", codeKey + ".ans")), quesData.mode)
+        end
       else
         $logger.info "Code: #{codeKey} compile error"
         res = "CE"
