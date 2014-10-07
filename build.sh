@@ -1,8 +1,6 @@
 #!/bin/bash
 
 cd $(dirname $0)
-cd src/build
-cmake ..
-make
-mv executor ../../bin
-mv libexecute.so ../../ext
+scons
+mv build/executor bin
+mv build/libexecutor.so lib/executor
