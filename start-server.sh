@@ -2,4 +2,4 @@
 
 cd $(dirname $0)
 cd lib
-exec ruby server.rb
+exec ruby server_controller.rb start
