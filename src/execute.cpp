@@ -1,10 +1,12 @@
 #include <iostream>
 #include <string>
 #include <cstdio>
+#include <cstring>
 
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <dirent.h>
 #include <sys/wait.h>
 #include <sys/ptrace.h>
 #include <sys/syscall.h>
@@ -15,6 +17,7 @@
 #include <sys/user.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "judgeStatus.hpp"
 #include "childErrorStatus.hpp"
@@ -51,6 +54,9 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
     string outFileName((pwd.parent_path() / "run" / "ans" / (exePath.filename().string() + ".ans")).string());
     if(!boost::filesystem::exists(boost::filesystem::path(inFileName)))
       exit(InFileNotFound);
+    DIR *dirp;
+    struct dirent *entry;
+    int dfd;
     fp = fopen(outFileName.c_str(), "w");
     dup2(fileno(fp), 1);
 		int fd = open(inFileName.c_str(), O_RDONLY, 0644);
@@ -65,6 +71,19 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
       exit(Dup2Error);
     close(fd);
     close(outFd);
+    dirp = opendir("/proc/self/fd");
+    dfd = dirfd(dirp);
+    while((entry = readdir(dirp))) {
+      int fd;
+      if(not strcmp(entry->d_name, ".") or not strcmp(entry->d_name, "..")) {
+        continue;
+      }
+      fd = boost::lexical_cast<int>(entry->d_name);
+      if(fd > 2 and fd != dfd) {
+        close(fd);
+      }
+    }
+    closedir(dirp);
     setupRLimit(RLIMIT_NPROC, 1);
     setupRLimit(RLIMIT_NOFILE, 64);
     setupRLimit(RLIMIT_MEMLOCK, 0);
