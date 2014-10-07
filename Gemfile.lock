@@ -17,6 +17,7 @@ GEM
     arel (5.0.1.20140414130214)
     blankslate (3.1.2)
     builder (3.2.2)
+    daemons (1.1.9)
     faraday (0.9.0)
       multipart-post (>= 1.2, < 3)
     ffi (1.9.3)
@@ -34,6 +35,7 @@ GEM
     minitest (5.3.4)
     multi_json (1.7.9)
     multipart-post (2.0.0)
+    mysql2 (0.3.16)
     rack (1.4.5)
     rest-client (1.6.7)
       mime-types (>= 1.16)
@@ -47,8 +49,10 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 4.1.1)
+  daemons
   ffi
   jimson (~> 0.10.0)
   jsonrpc-client
+  mysql2
   sqlite3
   thread_safe

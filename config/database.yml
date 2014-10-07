@@ -3,7 +3,7 @@
   :adapt: :sqllite3
   :database: db/judge.db
 :product:
-  :adapt: mysql
+  :adapt: mysql2
   :database: Juice
   :username:
   :password:
