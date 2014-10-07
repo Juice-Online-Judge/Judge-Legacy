@@ -44,7 +44,8 @@ Thread.new {
       if s.exitstatus == 0
         $logger.info "Start judge #{codeKey}"
         quesData = Lesson_Implement.where(implement_key: data.ipm_pt_key).first
-        Executor.executor(data.ipm_pt_key, File.join(AppPath, "run", "exe", codeKey), quesData.time_limit, quesData.memory_limit)
+        ret = Executor.executor(data.ipm_pt_key, File.join(AppPath, "run", "exe", codeKey), quesData.time_limit, quesData.memory_limit)
+        res = ReturnCode[ret] if res != 0
         if res == "AC"
           res = "WA" unless Judger.judge(quesData.ipm_pt_key, File.read(File.join(AppPath, "run", "ans", codeKey + ".ans")), quesData.mode)
         end

@@ -22,3 +22,9 @@ module Mode
   BLineWS = 3
   Loader = 4
 end
+
+ReturnCode = {
+  1 => "TLE",
+  2 => "MLE",
+  3 => "RE"
+}
