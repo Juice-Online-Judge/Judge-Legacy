@@ -33,9 +33,9 @@ Thread.new {
       type = LangType::C
       case type
       when LangType::C
-        cmd = "gcc -O2 -o #{AppPath}/run/exe/#{codeKey} -xc - -lm"
+        cmd = "gcc -O2 -include #{AppPath}/lib/define.h -o #{AppPath}/run/exe/#{codeKey} -xc - -lm"
       when LangType::CPP
-        cmd = "g++ -O2 -o #{codeKey} -xc - -lm"
+        cmd = "g++ -O2 -include #{AppPath}/lib/define.h -o #{codeKey} -xc - -lm"
       else
         # cmd = ExtraCmdGet::cmdGet(path.extname, pathStr)
         return "Error:Unknown file type" unless cmd
