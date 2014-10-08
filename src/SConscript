@@ -4,10 +4,14 @@ srcFiles = [
     "logger.cpp",
     ]
 
-Import("debug")
+Import("debug build32")
 
 env = Environment()
-env.Append(CXXFLAGS = "-m32 -Wall -std=gnu++11 -pthread", LINKFLAGS = "-m32", LIBS = [
+
+if build32:
+  env.Append(CXXFLAGS = "-m32", LINKFLAGS = "-m32")
+
+env.Append(CXXFLAGS = "-Wall -std=gnu++11 -pthread", LIBS = [
   "boost_program_options",
   "boost_filesystem",
   "boost_system",
