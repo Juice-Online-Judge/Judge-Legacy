@@ -1,5 +1,8 @@
 # Created by http://www.gitignore.io
 
+### zsh ###
+.zcache
+
 ### C ###
 # Object files
 *.o
