@@ -117,7 +117,7 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
       break;
     }
     ptrace(PTRACE_GETREGS, child, 0, &uregs);
-    syscall = uregs.orig_rax;
+    syscall = uregs.orig_eax;
     cout << "child call: " << syscall  << endl;
     if((syscall == SYS_fork || syscall == SYS_clone) && childStart) {
       cout << "child call fork" << endl;

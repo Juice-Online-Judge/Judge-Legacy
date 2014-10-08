@@ -7,7 +7,7 @@ srcFiles = [
 Import("debug")
 
 env = Environment()
-env.Append(CXXFLAGS = "-Wall -std=gnu++11 -pthread", LIBS = [
+env.Append(CXXFLAGS = "-m32 -Wall -std=gnu++11 -pthread", LINKFLAGS = "-m32", LIBS = [
   "boost_program_options",
   "boost_filesystem",
   "boost_system",
