@@ -8,9 +8,12 @@ require 'bundler'
 require 'yaml'
 
 data = File.read(File.join(File.dirname(__FILE__), "config.yml"))
+$config = YAML.load(data)
 
-config = YAML.load(data)
+data = File.read(File.join(File.dirname(__FILE__), "database.yml"))
+$database = YAML.load(data)
 
 Bundler.setup(:default, config[:mode])
 
 AppPath = File.expand_path File.join(File.dirname(__FILE__), "..")
+$database[$config[:mode]].sub!("$AppPath", AppPath)

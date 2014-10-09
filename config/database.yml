@@ -1,9 +1,10 @@
 ---
 :development:
-  :adapt: :sqllite3
-  :database: db/judge.db
+  :adapter: :sqllite3
+  :database: $AppPath/judge.db
 :product:
-  :adapt: mysql2
+  :adapter: mysql2
+  :host: localhost
   :database: Juice
   :username:
   :password:

@@ -5,10 +5,10 @@ require 'rubygems'
 
 require_relative '../../config/environment.rb'
 
-require 'sqlite3'
+require $database[$config[:mode]][:adapt]
 require 'active_record'
 
-ActiveRecord::Base.establish_connection(adapter:"sqlite3", database:"#{AppPath}/run/judge.db")
+ActiveRecord::Base.establish_connection($database[$config[:mode]])
 
 class Lesson_Implement < ActiveRecord::Base
   self.table_name = "lesson_implement"
