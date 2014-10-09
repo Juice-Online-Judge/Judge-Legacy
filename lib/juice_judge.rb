@@ -2,6 +2,7 @@
 #encoding:utf-8
 
 require 'active_record'
+require 'uri'
 require 'jsonrpc-client'
 
 client = JSONRPC::Client.new("http://localhost:4242")
