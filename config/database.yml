@@ -1,6 +1,6 @@
 ---
 :development:
-  :adapter: :sqllite3
+  :adapter: sqlite3
   :database: $AppPath/judge.db
 :product:
   :adapter: mysql2
