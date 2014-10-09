@@ -16,4 +16,4 @@ $database = YAML.load(data)
 Bundler.setup(:default, $config[:mode])
 
 AppPath = File.expand_path File.join(File.dirname(__FILE__), "..")
-$database[$config[:mode]].sub!("$AppPath", AppPath)
+$database[$config[:mode]][:database].sub!("$AppPath", AppPath)
