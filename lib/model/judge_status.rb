@@ -5,7 +5,7 @@ require 'rubygems'
 
 require_relative '../../config/environment.rb'
 
-require $database[$config[:mode]][:adapt]
+require $database[$config[:mode]][:adapter]
 require 'active_record'
 
 ActiveRecord::Base.establish_connection($database[$config[:mode]])
