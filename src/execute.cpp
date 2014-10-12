@@ -128,7 +128,6 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
       ptrace(PTRACE_KILL, child, NULL, NULL);
     }
     else {
-      ptrace(PTRACE_CONT, child, NULL, NULL);
       ptrace(PTRACE_SYSCALL, child, NULL, NULL);
     }
   }
