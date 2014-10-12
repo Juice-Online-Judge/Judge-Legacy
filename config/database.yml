@@ -1,7 +1,7 @@
 ---
 :development:
-  :adapter: sqlite3
-  :database: $AppPath/judge.db
+  :adapter: sqlite
+  :database: $AppPath/run/judge.db
 :product:
   :adapter: mysql2
   :host: localhost
