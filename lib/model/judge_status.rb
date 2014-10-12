@@ -5,15 +5,12 @@ require 'rubygems'
 
 require_relative '../../config/environment.rb'
 
-require $database[$config[:mode]][:adapter]
-require 'active_record'
+require 'sequel'
 
-ActiveRecord::Base.establish_connection($database[$config[:mode]])
+Sequel.connect($database[$config[:mode]])
 
-class Lesson_Implement < ActiveRecord::Base
-  self.table_name = "lesson_implement"
+class Lesson_Implement < Sequel::Model(:lesson_implement)
 end
 
-class User_Code_Lesson < ActiveRecord::Base
-  self.table_name = "user_code_lesson"
+class User_Code_Lesson < Sequel::Model(:user_code_lesson)
 end
