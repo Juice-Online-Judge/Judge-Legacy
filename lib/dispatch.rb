@@ -53,7 +53,6 @@ Thread.new {
         $logger.info "Code: #{codeKey} compile error"
         res = "CE"
       end
-      data = User_Code_Lesson.find(data.id)
       data.result = Result[res]
       data.save
     rescue Exception => e
