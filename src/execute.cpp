@@ -106,6 +106,7 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
       cout << "child exit:" << WEXITSTATUS(status) << endl;
       if(isErrorStatus(WEXITSTATUS(status))) {
         cerr << "Error: " << getErrorMessage(WEXITSTATUS(status)) << endl;
+        res = RE;
       }
       break;
     }
