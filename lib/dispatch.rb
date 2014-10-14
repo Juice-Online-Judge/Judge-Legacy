@@ -53,7 +53,7 @@ Thread.new {
         $logger.info "Code: #{codeKey} compile error"
         res = "CE"
       end
-      data.result = Result[res]
+      data.result = Result.fetch(res, 6)
       data.save
     rescue Exception => e
       $logger.error e.to_s
