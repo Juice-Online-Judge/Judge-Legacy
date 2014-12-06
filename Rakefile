@@ -18,7 +18,7 @@ directory "run/ans"
 directory "bin"
 directory "lib/executor"
 
-task default: %w(build db:migrate)
+task default: %w(build db:migrate message)
 
 desc "Make necessary directory"
 task :fileStruct => %w(run/in run/out run/exe run/ans bin lib/executor)
@@ -34,6 +34,10 @@ task :build => [:fileStruct] do
       raise "Please install scons"
     end
   end
+end
+
+task :message => %w(build db:migrate) do
+  puts "Done build"
 end
 
 task :clean do
