@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gem 'bundler'
 gem 'rake'
+gem 'rspec'
 gem 'thread_safe'
 gem 'jimson', '~> 0.10.0'
 gem 'sequel'

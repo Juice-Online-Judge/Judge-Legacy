@@ -25,6 +25,7 @@ task :fileStruct => %w(run/in run/out run/exe run/ans bin lib/executor)
 
 task :binstubs do
   sh 'bundle binstubs rake' unless File.exists? "bin/rake"
+  sh 'bundle binstubs rspec' unless File.exists? "bin/rspec"
   sh 'bundle binstubs sequel' unless File.exists? "bin/sequel"
 end
 
