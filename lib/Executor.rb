@@ -3,13 +3,13 @@
 
 require 'rubygems'
 
-require_relative '../config/environment.rb'
+require_relative File.join(File.dirname(__FILE__), "..", "config", "environment") unless defined? AppPath
 
 require 'ffi'
 
 module Executor
   extend FFI::Library
-  ffi_lib "executor/libexecutor.so"
+  ffi_lib "#{AppPath}/lib/executor/libexecutor.so"
   Pass = 0
   TLE = 1
   MLE = 2

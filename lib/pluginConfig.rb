@@ -2,7 +2,7 @@
 #encoding:utf-8
 
 require 'rubygems'
-require_relative '../config/environment.rb'
+require_relative File.join(File.dirname(__FILE__), "..", "config", "environment") unless defined? AppPath
 
 class ExtraCmdGet
   @@langSupport = {}

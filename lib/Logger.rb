@@ -4,7 +4,7 @@
 require 'rubygems'
 require 'logger'
 
-require '../config/environment'
+require_relative File.join(File.dirname(__FILE__), "..", "config", "environment") unless defined? AppPath
 
 f = File.new("#{AppPath}/run/Dispath.log", "a")
 f.sync = true

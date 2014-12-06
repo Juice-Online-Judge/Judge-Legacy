@@ -6,7 +6,7 @@ require 'thread'
 require 'open3'
 require 'pathname'
 
-require_relative '../config/environment.rb'
+require_relative File.join(File.dirname(__FILE__), "..", "config", "environment") unless defined? AppPath
 require_relative 'model/model'
 require_relative 'Const'
 require_relative 'Logger'
