@@ -23,3 +23,10 @@ namespace :db do
     Rake::Task['db:version'].execute
   end
 end
+
+desc "Open a pry session and load model"
+task :console do
+  verbose(false) do
+    sh "pry -I lib/model -r model"
+  end
+end
