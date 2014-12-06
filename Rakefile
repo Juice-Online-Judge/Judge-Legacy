@@ -52,6 +52,7 @@ task :message => %w(build db:migrate) do
 end
 
 task :server, [:action] do |t, args|
+  args.with_defaults(action: "start")
   if args[:action] == "start"
     Signal.trap("TERM") do
       puts "Shutdown"
