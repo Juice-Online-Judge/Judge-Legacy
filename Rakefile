@@ -51,6 +51,26 @@ task :message => %w(build db:migrate) do
   puts "Done build"
 end
 
+task :server, [:action] do |t, args|
+  if args[:action] == "start"
+    Signal.trap("TERM") do
+      puts "Shutdown"
+    end
+    require_relative 'lib/server'
+  elsif args[:action] == "stop"
+    Process.kill("TERM", File.read("run/lock/server.pid").to_i) if File.exist? "run/lock/server.pid"
+    FileUtils.rm "run/lock/server.pid", force: true
+  end
+end
+
+task :start do
+  Rake::Task["server"].invoke("start")
+end
+
+task :stop do
+  Rake::Task["server"].invoke("stop")
+end
+
 task :clean do
   rm_rf "build"
 end
