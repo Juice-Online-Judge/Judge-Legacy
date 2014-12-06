@@ -54,12 +54,9 @@ end
 task :server, [:action] do |t, args|
   args.with_defaults(action: "start")
   if args[:action] == "start"
-    Signal.trap("TERM") do
-      puts "Shutdown"
-    end
     require_relative 'lib/server'
   elsif args[:action] == "stop"
-    Process.kill("TERM", File.read("run/lock/server.pid").to_i) if File.exist? "run/lock/server.pid"
+    Process.kill("INT", File.read("run/lock/server.pid").to_i) if File.exist? "run/lock/server.pid"
     FileUtils.rm "run/lock/server.pid", force: true
   end
 end
