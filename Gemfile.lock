@@ -36,6 +36,7 @@ GEM
       pry (~> 0.9)
       slop (~> 3.0)
     rack (1.4.5)
+    rake (10.3.2)
     rest-client (1.6.7)
       mime-types (>= 1.16)
     sequel (4.15.0)
@@ -47,6 +48,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  bundler
   daemons
   ffi
   jimson (~> 0.10.0)
@@ -55,6 +57,7 @@ DEPENDENCIES
   pry
   pry-byebug
   pry-remote
+  rake
   sequel
   sqlite3
   thread_safe
