@@ -7,7 +7,7 @@ require 'open3'
 require 'pathname'
 
 require_relative '../config/environment.rb'
-require_relative 'model/judge_status.rb'
+require_relative 'model/model'
 require_relative 'Const'
 require_relative 'Logger'
 require_relative 'Executor'
@@ -23,11 +23,13 @@ Thread.new {
     begin
       $logger.info "Worker get task"
       codeKey = task[:codeKey]
-      data = User_Code_Lesson.where(code_key: codeKey).first
+      $logger.info "Fetching user submission data"
+      data = UserSubmission.where(id: codeKey).first
       unless data
-        $logger.error "Could not get data for key:#{codeKey}"
+        raise "Could not get data for key:#{codeKey}"
       end
-      code = data.user_code
+      $logger.info "Fetch done"
+      code = data.submit_content
       cmd = ""
       res = "AC"
       type = LangType::C
@@ -43,33 +45,36 @@ Thread.new {
       _, s = Open3.capture2(cmd, stdin_data: code)
       if s.exitstatus == 0
         $logger.info "Start judge #{codeKey}"
-        quesData = Lesson_Implement.where(implement_key: data.ipm_pt_key).first
+        quesData = data.lesson_exercise
         $logger.debug "Before exec res: #{res}"
-        ret = Executor.executor(data.ipm_pt_key, File.join(AppPath, "run", "exe", codeKey), quesData.time_limit, quesData.memory_limit)
+        ret = Executor.executor(codeKey, File.join(AppPath, "run", "exe", codeKey), quesData.exercise_tle, quesData.exercise_mle)
         $logger.debug "After exec res: #{res}"
         $logger.debug "After exec return code: #{ret}"
         res = ReturnCode[ret] if ret != 0
         if res == "AC"
-          res = "WA" unless Judger.judge(data.ipm_pt_key, File.read(File.join(AppPath, "run", "ans", codeKey + ".ans")), quesData.mode)
+          res = "WA" unless Judger.judge(codeKey, File.read(File.join(AppPath, "run", "ans", quesData.id.to_s + ".ans")), quesData.exercise_judge_mode)
         end
       else
         $logger.info "Code: #{codeKey} compile error"
         res = "CE"
       end
-      data.result = Result.fetch(res, 6)
+      data.judge_result = Result.fetch(res, 6)
       data.save
+    rescue RuntimeError => e
+      $logger.error e.to_s
     rescue Exception => e
       $logger.error e.to_s
+      $logger.error e.backtrace
     end
   end
 }
 
 class JudgeHandler
   extend Jimson::Handler
-  def addJudge(codeKey, tableName, problemKey)
+  def addJudge(codeKey)
     begin
       $logger.info "Add work key:#{codeKey}"
-      $taskQueue << {codeKey:codeKey, tableName:tableName, problemKey:problemKey}
+      $taskQueue << {codeKey:codeKey}
     rescue Exception => e
       $logger.error e.to_s
       throw
