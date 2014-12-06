@@ -2,7 +2,6 @@ source 'https://rubygems.org'
 
 gem 'bundler'
 gem 'rake'
-gem 'rspec'
 gem 'thread_safe'
 gem 'jimson', '~> 0.10.0'
 gem 'sequel'
@@ -19,4 +18,9 @@ end
 
 group :product do
   gem 'mysql2'
+end
+
+group :test do
+  gem 'rspec'
+  gem 'factory_girl'
 end
