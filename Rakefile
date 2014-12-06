@@ -74,6 +74,12 @@ task :clean do
   rm_rf "build"
 end
 
+begin
+  require 'rspec/core/rake_task'
+  RSpec::Core::RakeTask.new(:spec)
+rescue LoadError
+end
+
 namespace :db do
   require "sequel"
   Sequel.extension :migration
