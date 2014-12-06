@@ -116,6 +116,7 @@ install_manifest.txt
 
 run
 bin
+*.db
 # Created by https://www.gitignore.io
 
 ### SCons ###
