@@ -27,5 +27,9 @@ bundle install
 rake build
 ```
 
+## Todo ##
+- Test
+- spec
+
 ## Author ##
 DanSnow
