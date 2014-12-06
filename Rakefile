@@ -18,10 +18,21 @@ directory "run/ans"
 directory "bin"
 directory "lib/executor"
 
-task default: %w(build db:migrate message)
+task default: %w(check build binstubs db:migrate message)
 
 desc "Make necessary directory"
 task :fileStruct => %w(run/in run/out run/exe run/ans bin lib/executor)
+
+task :binstubs do
+  sh 'bundle binstubs rake' unless File.exists? "bin/rake"
+  sh 'bundle binstubs sequel' unless File.exists? "bin/sequel"
+end
+
+task :check do
+  unless RUBY_VERSION =~ /^2/
+    raise "Please use ruby >= 2.0"
+  end
+end
 
 desc "Build extenstion and file structure"
 task :build => [:fileStruct] do
