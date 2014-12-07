@@ -1,4 +1,7 @@
 ---
+:test:
+  :adapter: sqlite
+  :database: $AppPath/db/test.db
 :development:
   :adapter: sqlite
   :database: $AppPath/db/judge.db

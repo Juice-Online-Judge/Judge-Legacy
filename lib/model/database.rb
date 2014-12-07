@@ -7,4 +7,4 @@ require_relative '../../config/environment.rb'
 
 require 'sequel'
 
-Sequel.connect($database[$config[:mode]])
+Sequel.connect($database[Environment])

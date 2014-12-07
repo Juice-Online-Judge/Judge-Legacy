@@ -10,6 +10,8 @@ require 'yaml'
 data = File.read(File.join(File.dirname(__FILE__), "config.yml"))
 $config = YAML.load(data)
 
+Environment = (ENV["environment"] || $config.mode).to_sym unless defined? Environment
+
 data = File.read(File.join(File.dirname(__FILE__), "database.yml"))
 $database = YAML.load(data)
 
