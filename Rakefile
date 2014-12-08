@@ -15,13 +15,14 @@ directory "run/in"
 directory "run/out"
 directory "run/exe"
 directory "run/ans"
+directory "run/lock"
 directory "bin"
 directory "lib/executor"
 
 task default: %w(check build binstubs db:migrate message)
 
 desc "Make necessary directory"
-task :fileStruct => %w(run/in run/out run/exe run/ans bin lib/executor)
+task :fileStruct => %w(run/in run/out run/exe run/ans run/lock bin lib/executor)
 
 task :binstubs do
   sh 'bundle binstubs rake' unless File.exists? "bin/rake"
