@@ -75,9 +75,16 @@ task :clean do
   rm_rf "build"
 end
 
+namespace :test do
+  task :prepare do
+    ENV["environment"] = "test"
+  end
+end
+
 begin
   require 'rspec/core/rake_task'
   RSpec::Core::RakeTask.new(:spec)
+  task :spec => %w(test:prepare db:test:reset)
 rescue LoadError
 end
 
@@ -85,6 +92,21 @@ namespace :db do
   require "sequel"
   Sequel.extension :migration
   DB = Sequel.connect("sqlite://db/judge.db")
+
+  namespace :test do
+    file "db/test.db"
+    DBTest = Sequel.connect("sqlite://db/test.db")
+
+    task :prepare => "db/test.db" do
+      Sequel::Migrator.run(DBTest, "db/migrations")
+    end
+
+    task :clear => "db/test.db" do
+      Sequel::Migrator.run(DBTest, "db/migrations", target: 0)
+    end
+
+    task :reset => %w(db:test:clear db:test:prepare)
+  end
 
   desc "Perform migration up to latest migration available"
   task :migrate do
@@ -96,14 +118,12 @@ namespace :db do
     args.with_defaults(:target => 0)
 
     Sequel::Migrator.run(DB, "migrations", :target => args[:target].to_i)
-    Rake::Task['db:version'].execute
   end
 
   desc "Perform migration reset (full rollback and migration)"
   task :reset do
     Sequel::Migrator.run(DB, "migrations", :target => 0)
     Sequel::Migrator.run(DB, "migrations")
-    Rake::Task['db:version'].execute
   end
 end
 
