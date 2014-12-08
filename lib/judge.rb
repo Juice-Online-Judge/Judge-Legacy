@@ -7,19 +7,23 @@ require_relative '../config/environment.rb'
 
 class Judger
   def Judger.judge(ques, ans, mode)
-    out = File.read(File.join(AppPath, "run", "out", "#{ques}.out"))
-    out.each_line.zip(ans.each_line) { |x, y|
-      case mode
-      when Mode::Diff
-        return false if x != y
-      when Mode::WS
-        return false if x.strip != y.strip
-      when Mode::BLine
-        return false if x != y and x != "" and y != ""
-      when Mode::BLineWS
-        return false if x.strip != y.strip and x != "" and y != ""
-      end
-    }
-    return true
+    begin
+      out = File.read(File.join(AppPath, "run", "out", "#{ques}.out"))
+      out.each_line.zip(ans.each_line) { |x, y|
+        case mode
+        when Mode::Diff
+          return false if x != y
+        when Mode::WS
+          return false if x.strip != y.strip
+        when Mode::BLine
+          return false if x != y and x != "" and y != ""
+        when Mode::BLineWS
+          return false if x.strip != y.strip and x != "" and y != ""
+        end
+      }
+      return true
+    rescue Errno::ENOENT
+      raise "Ques: #{ques} output file not found in #{AppPath}/out"
+    end
   end
 end
