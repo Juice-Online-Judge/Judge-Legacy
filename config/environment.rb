@@ -10,7 +10,7 @@ require 'yaml'
 data = File.read(File.join(File.dirname(__FILE__), "config.yml"))
 $config = YAML.load(data)
 
-Environment = (ENV["environment"] || $config.mode).to_sym unless defined? Environment
+Environment = (ENV["environment"] || $config[:mode]).to_sym unless defined? Environment
 
 data = File.read(File.join(File.dirname(__FILE__), "database.yml"))
 $database = YAML.load(data)
@@ -18,4 +18,8 @@ $database = YAML.load(data)
 Bundler.setup(:default, $config[:mode])
 
 AppPath = File.expand_path File.join(File.dirname(__FILE__), "..")
-$database[$config[:mode]][:database].sub!("$AppPath", AppPath)
+$database.each{ |_, h|
+  if h.key? :database
+    h[:database].sub!("$AppPath", AppPath)
+  end
+}
