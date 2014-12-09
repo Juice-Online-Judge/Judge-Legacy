@@ -36,12 +36,15 @@ namespace {
   void startTrace(int);
   void timeLimitExceed(int);
   void setupRLimit(int, rlim_t);
+  void closeAllFile();
 }
 
 int execute(const string& projectRoot, const string& quesName, const string& pathStr, int timeLimit, int memoryLimit) {
   FILE *fp;
   user_regs_struct uregs;
   BOOST_LOG_TRIVIAL(info) << "Judge: " << pathStr;
+
+  // Set up signal hanlder
   if(signal(SIGUSR1, startTrace) == SIG_ERR) {
     BOOST_LOG_TRIVIAL(error) << "Error: Unable to create signal handler for SIGUSR1";
     return RE;
@@ -50,23 +53,27 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
     BOOST_LOG_TRIVIAL(error) << "Error: Unable to create signal handler for SIGALRM";
     return RE;
   }
+
   ::timeLimit = timeLimit;
   child = fork();
+
   if(child == 0) {
     boost::filesystem::path pwd(projectRoot), exePath(pathStr);
     string inFileName((pwd / "run" / "in" / (quesName + ".in")).string());
     string outFileName((pwd / "run" / "ans" / (exePath.filename().string() + ".ans")).string());
+
     BOOST_LOG_TRIVIAL(info) << "Input file: " << inFileName;
     BOOST_LOG_TRIVIAL(info) << "Output file: " << outFileName;
+
+    // File check
     if(!boost::filesystem::exists(boost::filesystem::path(inFileName)))
       exit(InFileNotFound);
     if(boost::filesystem::exists(boost::filesystem::path(outFileName))) {
       BOOST_LOG_TRIVIAL(info) << "Output file exist, remove it";
       boost::filesystem::remove(boost::filesystem::path(outFileName));
     }
-    DIR *dirp;
-    struct dirent *entry;
-    int dfd;
+
+    // Redirect input output
     fp = fopen(outFileName.c_str(), "w");
     dup2(fileno(fp), 1);
 		int fd = open(inFileName.c_str(), O_RDONLY, 0644);
@@ -81,26 +88,23 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
       exit(Dup2Error);
     close(fd);
     close(outFd);
-    dirp = opendir("/proc/self/fd");
-    dfd = dirfd(dirp);
-    while((entry = readdir(dirp))) {
-      int fd;
-      if(not strcmp(entry->d_name, ".") or not strcmp(entry->d_name, "..")) {
-        continue;
-      }
-      fd = boost::lexical_cast<int>(entry->d_name);
-      if(fd > 2 and fd != dfd) {
-        close(fd);
-      }
-    }
-    closedir(dirp);
+
+    // Close all fd still open
+    closeAllFile();
+
+    // Set up limit
     setupRLimit(RLIMIT_NPROC, 1);
     setupRLimit(RLIMIT_NOFILE, 64);
     setupRLimit(RLIMIT_MEMLOCK, 0);
     setupRLimit(RLIMIT_AS, (memoryLimit + 15) * 1024 * 1024);
+
+    // Start trace
     kill(getppid(), SIGUSR1);
     ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+
+    // Exec
     execlp(pathStr.c_str(), pathStr.c_str(), NULL);
+
     exit(ExeclpError);
   }
   if(child < 0) {
@@ -110,6 +114,7 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
   while(1) {
     int status;
     int syscall;
+    // wail for event
     wait(&status);
     if(WIFEXITED(status)) {
       alarm(0); // cancel
@@ -151,6 +156,25 @@ namespace {
     alarm(timeLimit);
     ptrace(PTRACE_SYSCALL, child, NULL, NULL);
     childStart = 1;
+  }
+
+  void closeAllFile() {
+    DIR *dirp;
+    struct dirent *entry;
+    int dfd;
+    dirp = opendir("/proc/self/fd");
+    dfd = dirfd(dirp);
+    while((entry = readdir(dirp))) {
+      int fd;
+      if(not strcmp(entry->d_name, ".") or not strcmp(entry->d_name, "..")) {
+        continue;
+      }
+      fd = boost::lexical_cast<int>(entry->d_name);
+      if(fd > 2 and fd != dfd) {
+        close(fd);
+      }
+    }
+    closedir(dirp);
   }
 
   void timeLimitExceed(int /*signo*/) {
