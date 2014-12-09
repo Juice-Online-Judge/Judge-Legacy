@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 
 #include "logger.hpp"
 #include "execute.hpp"
@@ -10,9 +11,10 @@ using namespace std;
 int main(int argc, char *argv[]) {
   namespace po = boost::program_options;
   int sec, mem;
+  boost::filesystem::path cur_path = boost::filesystem::current_path();
   string ques, path;
   po::options_description desc("Options");
-  loggerInit(argv);
+  loggerInit(cur_path.parent_path().string().c_str());
   desc.add_options()
     ("help,h", "Show help messages")
     ("time,t", po::value<int>(&sec)->required(), "Time limit(Sec)")
@@ -43,5 +45,5 @@ int main(int argc, char *argv[]) {
   }
   ques = vm["question"].as<string>();
   path = vm["exec-file"].as<string>();
-  return execute(ques, path, sec, mem);
+  return execute(cur_path.parent_path().string(), ques, path, sec, mem);
 }

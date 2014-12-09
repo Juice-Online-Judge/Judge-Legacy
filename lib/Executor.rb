@@ -14,5 +14,8 @@ module Executor
   TLE = 1
   MLE = 2
   RE = 3
-  attach_function :executor, [:string, :string, :int, :int], :int
+  attach_function :executor, [:string, :string, :string, :int, :int], :int
+  def self.execute(ques, path, tle, mle)
+    self.executor(AppPath, ques, path, tle, mle)
+  end
 end

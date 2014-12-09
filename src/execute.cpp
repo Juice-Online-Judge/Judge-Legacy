@@ -22,6 +22,7 @@
 #include "judgeStatus.hpp"
 #include "childErrorStatus.hpp"
 #include "execute.hpp"
+#include "logger.hpp"
 
 using namespace std;
 
@@ -37,23 +38,32 @@ namespace {
   void setupRLimit(int, rlim_t);
 }
 
-int execute(const string& quesName, const string& pathStr, int timeLimit, int memoryLimit) {
+int execute(const string& projectRoot, const string& quesName, const string& pathStr, int timeLimit, int memoryLimit) {
   FILE *fp;
   user_regs_struct uregs;
+  BOOST_LOG_TRIVIAL(info) << "Judge: " << pathStr;
   if(signal(SIGUSR1, startTrace) == SIG_ERR) {
-    cerr << "Error: Unable to create signal handler for SIGUSR1" << endl;
+    BOOST_LOG_TRIVIAL(error) << "Error: Unable to create signal handler for SIGUSR1";
+    return RE;
   }
   if(signal(SIGALRM, timeLimitExceed) == SIG_ERR) {
-    cerr << "Error: Unable to create signal handler for SIGALRM" << endl;
+    BOOST_LOG_TRIVIAL(error) << "Error: Unable to create signal handler for SIGALRM";
+    return RE;
   }
   ::timeLimit = timeLimit;
   child = fork();
   if(child == 0) {
-    boost::filesystem::path pwd(boost::filesystem::current_path()), exePath(pathStr);
-    string inFileName((pwd.parent_path() / "run" / "in" / (quesName + ".in")).string());
-    string outFileName((pwd.parent_path() / "run" / "ans" / (exePath.filename().string() + ".ans")).string());
+    boost::filesystem::path pwd(projectRoot), exePath(pathStr);
+    string inFileName((pwd / "run" / "in" / (quesName + ".in")).string());
+    string outFileName((pwd / "run" / "ans" / (exePath.filename().string() + ".ans")).string());
+    BOOST_LOG_TRIVIAL(info) << "Input file: " << inFileName;
+    BOOST_LOG_TRIVIAL(info) << "Output file: " << outFileName;
     if(!boost::filesystem::exists(boost::filesystem::path(inFileName)))
       exit(InFileNotFound);
+    if(boost::filesystem::exists(boost::filesystem::path(outFileName))) {
+      BOOST_LOG_TRIVIAL(info) << "Output file exist, remove it";
+      boost::filesystem::remove(boost::filesystem::path(outFileName));
+    }
     DIR *dirp;
     struct dirent *entry;
     int dfd;
@@ -103,9 +113,9 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
     wait(&status);
     if(WIFEXITED(status)) {
       alarm(0); // cancel
-      cout << "child exit:" << WEXITSTATUS(status) << endl;
+      BOOST_LOG_TRIVIAL(info) << "Child process exit with status: " << WEXITSTATUS(status);
       if(isErrorStatus(WEXITSTATUS(status))) {
-        cerr << "Error: " << getErrorMessage(WEXITSTATUS(status)) << endl;
+        BOOST_LOG_TRIVIAL(error) << "Child occur error: " << getErrorMessage(WEXITSTATUS(status));
         res = RE;
       }
       break;
@@ -114,7 +124,7 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
       alarm(0);  //cancel
       if(res == PASS)
         res = RE;
-      cout << "child got signal " << WTERMSIG(status) << endl;
+      BOOST_LOG_TRIVIAL(info) << "Child process got signal: " << WTERMSIG(status) << endl;
       break;
     }
     ptrace(PTRACE_GETREGS, child, 0, &uregs);
@@ -123,9 +133,9 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
 #else
     syscall = uregs.orig_eax;
 #endif
-    cout << "child call: " << syscall  << endl;
+    BOOST_LOG_TRIVIAL(info) << "Child call syscall: " << syscall;
     if((syscall == SYS_fork || syscall == SYS_clone) && childStart) {
-      cout << "child call fork" << endl;
+      BOOST_LOG_TRIVIAL(info) << "Child call fork, kill";
       ptrace(PTRACE_KILL, child, NULL, NULL);
     }
     else {
@@ -137,7 +147,7 @@ int execute(const string& quesName, const string& pathStr, int timeLimit, int me
 
 namespace {
   void startTrace(int /*signo*/) {
-    cout << "start judge" << endl;
+    BOOST_LOG_TRIVIAL(info) << "Start Trace";
     alarm(timeLimit);
     ptrace(PTRACE_SYSCALL, child, NULL, NULL);
     childStart = 1;
@@ -145,7 +155,9 @@ namespace {
 
   void timeLimitExceed(int /*signo*/) {
     static int occurTime = 0;
+    BOOST_LOG_TRIVIAL(info) << "Time exceed";
     if(occurTime) {
+      BOOST_LOG_TRIVIAL(info) << "Tle kill";
       kill(child, SIGKILL);  // time limit exceed twice. kill it
     }
     else {

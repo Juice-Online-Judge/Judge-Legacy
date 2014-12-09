@@ -1,7 +1,7 @@
 #ifndef LOGGER_HPP_INCLUDE
 #define LOGGER_HPP_INCLUDE
 
-void loggerInit(char **);
+void loggerInit(const char *);
 
 #include "logger_priv.hpp"
 

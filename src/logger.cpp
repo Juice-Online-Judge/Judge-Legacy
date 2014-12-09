@@ -15,10 +15,10 @@
 
 using namespace std;
 
-void loggerInit(char *argv[]) {
+void loggerInit(const char *path) {
   using namespace boost::log;
-  boost::filesystem::path programPath(boost::filesystem::absolute(boost::filesystem::path(argv[0]).parent_path()));
-  auto logPath = programPath / "executor.log";
+  boost::filesystem::path projectRoot(boost::filesystem::absolute(boost::filesystem::path(path)));
+  auto logPath = projectRoot / "run" / "executor.log";
   boost::shared_ptr<sinks::text_ostream_backend> backend(new sinks::text_ostream_backend());
   backend->add_stream(boost::shared_ptr<ostream>(&clog, boost::empty_deleter()));
   backend->add_stream(boost::shared_ptr<ofstream>(new ofstream(logPath.string(), ofstream::app)));
