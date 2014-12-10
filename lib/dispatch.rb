@@ -47,12 +47,12 @@ Thread.new {
         $logger.info "Start judge #{codeKey}"
         quesData = data.lesson_exercise
         $logger.debug "Before exec res: #{res}"
-        ret = Executor.execute(codeKey, File.join(AppPath, "run", "exe", codeKey), quesData.exercise_tle, quesData.exercise_mle)
+        ret = Executor.execute(quesData.id, File.join(AppPath, "run", "exe", codeKey), quesData.exercise_tle, quesData.exercise_mle)
         $logger.debug "After exec res: #{res}"
         $logger.debug "After exec return code: #{ret}"
         res = ReturnCode[ret] if ret != 0
         if res == "AC"
-          res = "WA" unless Judger.judge(codeKey, File.read(File.join(AppPath, "run", "ans", quesData.id.to_s + ".ans")), quesData.exercise_judge_mode)
+          res = "WA" unless Judger.judge(quesData.id, File.read(File.join(AppPath, "run", "ans", quesData.id.to_s + ".ans")), quesData.exercise_judge_mode)
         end
       else
         $logger.info "Code: #{codeKey} compile error"
