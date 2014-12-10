@@ -52,7 +52,7 @@ Thread.new {
         $logger.debug "After exec return code: #{ret}"
         res = ReturnCode[ret] if ret != 0
         if res == "AC"
-          res = "WA" unless Judger.judge(quesData.id, File.read(File.join(AppPath, "run", "ans", quesData.id.to_s + ".ans")), quesData.exercise_judge_mode)
+          res = "WA" unless Judger.judge(quesData.id, File.read(File.join(AppPath, "run", "ans", codyKey + ".ans")), quesData.exercise_judge_mode)
         end
       else
         $logger.info "Code: #{codeKey} compile error"
