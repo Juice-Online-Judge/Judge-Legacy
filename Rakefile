@@ -92,7 +92,7 @@ namespace :db do
   require "sequel"
   require_relative 'config/environment'
   Sequel.extension :migration
-  DB = Sequel.connect($database[Environemnt])
+  DB = Sequel.connect($database[Environment])
 
   namespace :test do
     file "db/test.db"
