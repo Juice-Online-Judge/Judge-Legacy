@@ -19,7 +19,7 @@ directory "run/lock"
 directory "bin"
 directory "lib/executor"
 
-task default: %w(check build binstubs db:migrate message)
+task default: %w(check build binstubs message)
 
 desc "Make necessary directory"
 task :fileStruct => %w(run/in run/out run/exe run/ans run/lock bin lib/executor)
