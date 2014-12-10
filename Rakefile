@@ -90,8 +90,9 @@ end
 
 namespace :db do
   require "sequel"
+  require_relative 'config/environment'
   Sequel.extension :migration
-  DB = Sequel.connect("sqlite://db/judge.db")
+  DB = Sequel.connect($database[Environemnt])
 
   namespace :test do
     file "db/test.db"

@@ -7,4 +7,6 @@ require_relative '../../config/environment.rb'
 
 require 'sequel'
 
-Sequel.connect($database[Environment])
+Object.send(:remove_const, :DB)
+DB = Sequel.connect($database[Environment])
+Sequel::Model.db = DB

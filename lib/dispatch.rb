@@ -24,7 +24,7 @@ Thread.new {
       $logger.info "Worker get task"
       codeKey = task[:codeKey]
       $logger.info "Fetching user submission data"
-      data = UserSubmission.where(id: codeKey).first
+      data = UserSubmission.find(id: codeKey.to_i)
       unless data
         raise "Could not get data for key:#{codeKey}"
       end
