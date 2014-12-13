@@ -14,3 +14,4 @@ File.write(File.join(AppPath, "run", "lock", "server.pid"), Process.pid)
 
 $logger.info "Server start"
 require_relative 'dispatch'
+File.unlink(File.join(AppPath, "run", "lock", "server.pid"))
