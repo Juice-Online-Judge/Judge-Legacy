@@ -11,10 +11,11 @@ namespace {
 
 extern "C" {
   void executorInit(char *root) {
+    Logger::Init(root);
     ::root = root;
-    loggerInit(root);
-    BOOST_LOG_TRIVIAL(info) << "Executor Initialize";
-    BOOST_LOG_TRIVIAL(info) << "Root: " << root;
+    Logger& logger = Logger::GetInstance();
+    logger.info() << "Executor Initialize";
+    logger.info() << "Root: " << root;
   }
 
   int executor(char *ques, char *path, int sec, int mem) {

@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
   boost::filesystem::path cur_path = boost::filesystem::current_path();
   string ques, path;
   po::options_description desc("Options");
-  loggerInit(cur_path.parent_path().string().c_str());
+  Logger::Init(cur_path.parent_path().string().c_str());
   desc.add_options()
     ("help,h", "Show help messages")
     ("time,t", po::value<int>(&sec)->required(), "Time limit(Sec)")

@@ -42,15 +42,16 @@ namespace {
 int execute(const string& projectRoot, const string& quesName, const string& pathStr, int timeLimit, int memoryLimit) {
   FILE *fp;
   user_regs_struct uregs;
-  BOOST_LOG_TRIVIAL(info) << "Judge: " << pathStr;
+  Logger& logger = Logger::GetInstance();
+  logger.info() << "Judge: " << pathStr;
 
   // Set up signal hanlder
   if(signal(SIGUSR1, startTrace) == SIG_ERR) {
-    BOOST_LOG_TRIVIAL(error) << "Error: Unable to create signal handler for SIGUSR1";
+    logger.error() << "Error: Unable to create signal handler for SIGUSR1";
     return RE;
   }
   if(signal(SIGALRM, timeLimitExceed) == SIG_ERR) {
-    BOOST_LOG_TRIVIAL(error) << "Error: Unable to create signal handler for SIGALRM";
+    logger.error() << "Error: Unable to create signal handler for SIGALRM";
     return RE;
   }
 
@@ -62,14 +63,14 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
     string inFileName((pwd / "run" / "in" / (quesName + ".in")).string());
     string outFileName((pwd / "run" / "ans" / (exePath.filename().string() + ".ans")).string());
 
-    BOOST_LOG_TRIVIAL(info) << "Input file: " << inFileName;
-    BOOST_LOG_TRIVIAL(info) << "Output file: " << outFileName;
+    logger.info() << "Input file: " << inFileName;
+    logger.info() << "Output file: " << outFileName;
 
     // File check
     if(!boost::filesystem::exists(boost::filesystem::path(inFileName)))
       exit(InFileNotFound);
     if(boost::filesystem::exists(boost::filesystem::path(outFileName))) {
-      BOOST_LOG_TRIVIAL(info) << "Output file exist, remove it";
+      logger.info() << "Output file exist, remove it";
       boost::filesystem::remove(boost::filesystem::path(outFileName));
     }
 
@@ -118,9 +119,9 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
     wait(&status);
     if(WIFEXITED(status)) {
       alarm(0); // cancel
-      BOOST_LOG_TRIVIAL(info) << "Child process exit with status: " << WEXITSTATUS(status);
+      logger.info() << "Child process exit with status: " << WEXITSTATUS(status);
       if(isErrorStatus(WEXITSTATUS(status))) {
-        BOOST_LOG_TRIVIAL(error) << "Child occur error: " << getErrorMessage(WEXITSTATUS(status));
+        logger.error() << "Child occur error: " << getErrorMessage(WEXITSTATUS(status));
         res = RE;
       }
       break;
@@ -129,7 +130,7 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
       alarm(0);  //cancel
       if(res == PASS)
         res = RE;
-      BOOST_LOG_TRIVIAL(info) << "Child process got signal: " << WTERMSIG(status) << endl;
+      logger.info() << "Child process got signal: " << WTERMSIG(status);
       break;
     }
     ptrace(PTRACE_GETREGS, child, 0, &uregs);
@@ -138,9 +139,9 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
 #else
     syscall = uregs.orig_eax;
 #endif
-    BOOST_LOG_TRIVIAL(info) << "Child call syscall: " << syscall;
+    logger.info() << "Child call syscall: " << syscall;
     if((syscall == SYS_fork || syscall == SYS_clone) && childStart) {
-      BOOST_LOG_TRIVIAL(info) << "Child call fork, kill";
+      logger.info() << "Child call fork, kill";
       ptrace(PTRACE_KILL, child, NULL, NULL);
     }
     else {
@@ -152,7 +153,8 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
 
 namespace {
   void startTrace(int /*signo*/) {
-    BOOST_LOG_TRIVIAL(info) << "Start Trace";
+    Logger& logger = Logger::GetInstance();
+    logger.info() << "Start Trace";
     alarm(timeLimit);
     ptrace(PTRACE_SYSCALL, child, NULL, NULL);
     childStart = 1;
@@ -179,9 +181,10 @@ namespace {
 
   void timeLimitExceed(int /*signo*/) {
     static int occurTime = 0;
-    BOOST_LOG_TRIVIAL(info) << "Time exceed";
+    Logger& logger = Logger::GetInstance();
+    logger.info() << "Time exceed";
     if(occurTime) {
-      BOOST_LOG_TRIVIAL(info) << "Tle kill";
+      logger.info() << "Tle kill";
       kill(child, SIGKILL);  // time limit exceed twice. kill it
     }
     else {

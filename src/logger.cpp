@@ -3,6 +3,10 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <mutex>
+#include <string>
+#include <sstream>
+#include <utility>
 
 #include <boost/filesystem.hpp>
 #include <boost/log/expressions.hpp>
@@ -15,7 +19,14 @@
 
 using namespace std;
 
-void loggerInit(const char *path) {
+namespace {
+  mutex instanceMutex;
+  string path;
+};
+
+Logger *Logger::logger = nullptr;
+
+Logger::Logger(const string& path) {
   using namespace boost::log;
   boost::filesystem::path projectRoot(boost::filesystem::absolute(boost::filesystem::path(path)));
   auto logPath = projectRoot / "run" / "executor.log";
@@ -44,3 +55,56 @@ void loggerInit(const char *path) {
 
   BOOST_LOG_TRIVIAL(info) << "Logger start";
 }
+
+void Logger::Init(const char *path) {
+  ::path = path;
+}
+
+Logger& Logger::GetInstance() {
+  static Logger *tmp;
+  if(logger == nullptr) {
+    lock_guard<mutex> mLock(instanceMutex);
+    if(logger == nullptr) {
+      tmp = new Logger(::path);
+      if(logger == nullptr) {
+        logger = tmp;
+      }
+    }
+  }
+  return *logger;
+}
+
+Logger::LoggerWrapper Logger::info() {
+  LoggerWrapper wrapper(LoggerWrapper::i);
+  return wrapper;
+}
+
+Logger::LoggerWrapper Logger::debug() {
+  LoggerWrapper wrapper(LoggerWrapper::d);
+  return wrapper;
+}
+
+Logger::LoggerWrapper Logger::error() {
+  LoggerWrapper wrapper(LoggerWrapper::e);
+  return wrapper;
+}
+
+Logger::LoggerWrapper::~LoggerWrapper() {
+  switch(l) {
+    case i:
+      BOOST_LOG_TRIVIAL(info) << sstr->str();
+      break;
+    case d:
+      BOOST_LOG_TRIVIAL(debug) << sstr->str();
+      break;
+    case e:
+      BOOST_LOG_TRIVIAL(error) << sstr->str();
+      break;
+  }
+}
+
+Logger::LoggerWrapper& Logger::LoggerWrapper::operator<<(int data) {
+  (*sstr) << data;
+  return *this;
+}
+
