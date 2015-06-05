@@ -1,4 +1,14 @@
 env = Environment()
-env.Append(LIBS = ['gtest', 'gtest_main', 'pthread'])
+env.Append(
+  CXXFLAGS = [
+    '-std=gnu++11'
+  ],
+  LIBS = [
+    'gtest',
+    'gtest_main',
+    'boost_filesystem',
+    "boost_system",
+    'pthread'
+])
 
 env.Program('unit_test', Glob('*.cpp'))
