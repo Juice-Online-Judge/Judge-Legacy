@@ -2,20 +2,23 @@
 #define CONFIG_HPP_INCLUDE
 
 #include <string>
-#include <boost/property_tree/ptree.hpp>
+
+struct Impl;
 
 class Config {
-  public:
-    Config();
-    Config(std::string&);
-    template <typename T>
-    T get(std::string&);
-    std::string get(std::string&);
-    void load(std::string&);
-  private:
-    std::string fileName;
-    boost::property_tree::ptree root;
+public:
+  Config();
+  Config(const std::string&);
+  template <typename T>
+  T get(const std::string&);
+  std::string get(const std::string&);
+  void load_config(const std::string&);
+  const std::string& get_filename() const;
+private:
+  void load_json(void);
+  Impl *self;
 };
 
 #endif /* end of include guard: CONFIG_HPP_INCLUDE */
+
 
