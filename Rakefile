@@ -75,7 +75,13 @@ task :clean do
   rm_rf "build"
 end
 
-namespace :test do
+task :test do
+  Dir.chdir 'test' do
+    sh './unit_test'
+  end
+end
+
+namespace :spec do
   task :prepare do
     ENV["environment"] = "test"
   end
@@ -84,7 +90,7 @@ end
 begin
   require 'rspec/core/rake_task'
   RSpec::Core::RakeTask.new(:spec)
-  task :spec => %w(test:prepare db:test:reset)
+  task :spec => %w(spec:prepare db:test:reset)
 rescue LoadError
 end
 
