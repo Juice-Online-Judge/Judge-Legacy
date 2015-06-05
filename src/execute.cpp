@@ -20,7 +20,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "judgeStatus.hpp"
-#include "childErrorStatus.hpp"
+#include "child_error_status.hpp"
 #include "execute.hpp"
 #include "logger.hpp"
 
@@ -68,7 +68,7 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
 
     // File check
     if(!boost::filesystem::exists(boost::filesystem::path(inFileName)))
-      exit(InFileNotFound);
+      exit(INPUT_FILE_NOT_FOUND_ERROR);
     if(boost::filesystem::exists(boost::filesystem::path(outFileName))) {
       logger.info() << "Output file exist, remove it";
       boost::filesystem::remove(boost::filesystem::path(outFileName));
@@ -80,13 +80,13 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
 		int fd = open(inFileName.c_str(), O_RDONLY, 0644);
     int outFd = open(outFileName.c_str(), O_WRONLY);
 		if(fd < 0)
-      exit(FileOpenError);
+      exit(FILE_OPEN_ERROR);
     if(outFd < 0)
-      exit(FileOpenError);
+      exit(FILE_OPEN_ERROR);
 		if(dup2(fd, STDIN_FILENO) < 0)
-      exit(Dup2Error);
+      exit(DUP2_ERROR);
 		if(dup2(outFd, STDOUT_FILENO) < 0)
-      exit(Dup2Error);
+      exit(DUP2_ERROR);
     close(fd);
     close(outFd);
 
@@ -106,7 +106,7 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
     // Exec
     execlp(pathStr.c_str(), pathStr.c_str(), NULL);
 
-    exit(ExeclpError);
+    exit(EXEC_ERROR);
   }
   if(child < 0) {
     return RE;
@@ -120,8 +120,8 @@ int execute(const string& projectRoot, const string& quesName, const string& pat
     if(WIFEXITED(status)) {
       alarm(0); // cancel
       logger.info() << "Child process exit with status: " << WEXITSTATUS(status);
-      if(isErrorStatus(WEXITSTATUS(status))) {
-        logger.error() << "Child occur error: " << getErrorMessage(WEXITSTATUS(status));
+      if(is_error_status(WEXITSTATUS(status))) {
+        logger.error() << "Child occur error: " << get_error_message(WEXITSTATUS(status));
         res = RE;
       }
       break;

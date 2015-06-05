@@ -108,3 +108,8 @@ Logger::LoggerWrapper& Logger::LoggerWrapper::operator<<(int data) {
   return *this;
 }
 
+Logger::LoggerWrapper& Logger::LoggerWrapper::operator<<(const char *data) {
+  (*sstr) << data;
+  return *this;
+}
+

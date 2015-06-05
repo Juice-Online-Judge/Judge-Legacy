@@ -2,6 +2,7 @@ srcFiles = [
     "config.cpp",
     "execute.cpp",
     "logger.cpp",
+    "child_error_status.cpp"
     ]
 
 Import("debug build32")

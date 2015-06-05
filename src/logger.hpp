@@ -16,6 +16,7 @@ private:
     template <typename T>
     LoggerWrapper& operator<<(T& data);
     LoggerWrapper& operator<<(int);
+    LoggerWrapper& operator<<(const char *);
   private:
     level l;
     std::unique_ptr<std::stringstream> sstr;
