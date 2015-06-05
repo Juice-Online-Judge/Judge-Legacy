@@ -114,6 +114,7 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
+test/unit_test
 run
 bin
 *.db
