@@ -1,0 +1,4 @@
+env = Environment()
+env.Append(LIBS = ['gtest', 'gtest_main', 'pthread'])
+
+env.Program('unit_test', Glob('*.cpp'))
