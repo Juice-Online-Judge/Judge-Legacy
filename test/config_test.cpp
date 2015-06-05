@@ -4,8 +4,8 @@
 
 class ConfigTest : public ::testing::Test {
 public:
-  ConfigTest();
-  ~ConfigTest();
+  ConfigTest(){}
+  ~ConfigTest(){}
 
 protected:
   Config config;
